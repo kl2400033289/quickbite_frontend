@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" fill="none">
+  <defs>
+    <linearGradient id="dogFur" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="60%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+    <linearGradient id="dogCollar" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22C55E"/>
+      <stop offset="100%" stop-color="#15803D"/>
+    </linearGradient>
+    <filter id="dogShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#B45309" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="120" cy="215" rx="55" ry="10" fill="#14171B" fill-opacity="0.12"/>
+
+  <!-- Wagging Tail (Animated with CSS keyframes) -->
+  <g class="dog-tail" transform="translate(60, 140)">
+    <path d="M10 25 C-15 15 -25 -5 -8 -15 C-2 -18 6 -12 4 -5 C0 5 15 15 20 20 Z" fill="url(#dogFur)"/>
+    <circle cx="-10" cy="-12" r="5" fill="#FEF3C7"/>
+  </g>
+
+  <!-- Fluffy Dog Body -->
+  <ellipse cx="115" cy="165" rx="42" ry="34" fill="url(#dogFur)" filter="url(#dogShadow)"/>
+
+  <!-- Paws (Sitting politely) -->
+  <ellipse cx="95" cy="198" rx="12" ry="10" fill="#FDE68A"/>
+  <ellipse cx="135" cy="198" rx="12" ry="10" fill="#FDE68A"/>
+  <path d="M91 202 L91 205 M95 202 L95 205 M99 202 L99 205" stroke="#92400E" stroke-width="2" stroke-linecap="round"/>
+  <path d="M131 202 L131 205 M135 202 L135 205 M139 202 L139 205" stroke="#92400E" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Cute Green Collar matching Rider -->
+  <rect x="96" y="125" width="48" height="10" rx="5" fill="url(#dogCollar)"/>
+  <!-- Gold Bell / QuickBite Pendant -->
+  <circle cx="120" cy="136" r="6" fill="#FDE047"/>
+  <circle cx="120" cy="136" r="2" fill="#B45309"/>
+
+  <!-- Dog Head (Tilted slightly for maximum cuteness) -->
+  <g transform="translate(120, 85) rotate(4)">
+    <!-- Floppy Left Ear -->
+    <path d="M-28 -5 C-42 -2 -48 35 -35 48 C-25 55 -15 35 -20 15 Z" fill="#92400E"/>
+
+    <!-- Floppy Right Ear -->
+    <path d="M28 -5 C42 -2 48 35 35 48 C25 55 15 35 20 15 Z" fill="#92400E"/>
+
+    <!-- Head Shape -->
+    <circle cx="0" cy="15" r="34" fill="url(#dogFur)"/>
+    <!-- Fluffy Forehead Tuft -->
+    <path d="M-8 -15 Q0 -25 8 -15 Q14 -22 18 -12" stroke="url(#dogFur)" stroke-width="8" stroke-linecap="round" fill="none"/>
+
+    <!-- Snout / Muzzle -->
+    <ellipse cx="0" cy="26" rx="18" ry="14" fill="#FEF3C7"/>
+    <!-- Cute Black Nose -->
+    <path d="M-6 18 Q0 14 6 18 Q4 26 0 26 Q-4 26 -6 18 Z" fill="#1F2937"/>
+    <circle cx="-2" cy="18" r="1.5" fill="#FFFFFF"/>
+    <!-- Tongue out (Happy panting) -->
+    <path d="M-4 32 C-4 40 4 40 4 32 Z" fill="#F87171"/>
+    <!-- Mouth curve -->
+    <path d="M-8 28 Q0 34 8 28" stroke="#78350F" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+    <!-- Shiny Big Eyes -->
+    <circle cx="-14" cy="12" r="6" fill="#1F2937"/>
+    <circle cx="14" cy="12" r="6" fill="#1F2937"/>
+    <circle cx="-16" cy="10" r="2.5" fill="#FFFFFF"/>
+    <circle cx="12" cy="10" r="2.5" fill="#FFFFFF"/>
+    <!-- Eyebrow dots -->
+    <circle cx="-14" cy="2" r="2.5" fill="#FDE68A"/>
+    <circle cx="14" cy="2" r="2.5" fill="#FDE68A"/>
+  </g>
+</svg>
