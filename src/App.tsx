@@ -9,6 +9,7 @@ import { CartDrawer } from './components/common/CartDrawer';
 import { WelcomeIntroModal } from './components/intro/WelcomeIntroModal';
 import { SideCompanionsDock } from './components/characters/SideCompanionsDock';
 import { ApiStatusBanner } from './components/common/ApiStatusBanner';
+import { ProtectedRoute } from './components/common/ProtectedRoute';
 
 // Pages
 import { HomePage } from './pages/HomePage';
@@ -22,6 +23,8 @@ import { OrderHistoryPage } from './pages/OrderHistoryPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { RestaurantDashboardPage } from './pages/RestaurantDashboardPage';
+import { DeliveryPartnerPage } from './pages/DeliveryPartnerPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
 
 // Scroll to top helper on route change
 function ScrollToTop() {
@@ -65,13 +68,57 @@ export function App() {
                 <Route path="/explore" element={<ExplorePage />} />
                 <Route path="/restaurant/:id" element={<RestaurantDetailPage />} />
                 <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route
+                  path="/checkout"
+                  element={
+                    <ProtectedRoute>
+                      <CheckoutPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/payment-result" element={<PaymentResultPage />} />
-                <Route path="/track/:orderId" element={<OrderTrackingPage />} />
-                <Route path="/orders" element={<OrderHistoryPage />} />
+                <Route
+                  path="/track/:orderId"
+                  element={
+                    <ProtectedRoute>
+                      <OrderTrackingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <ProtectedRoute>
+                      <OrderHistoryPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
-                <Route path="/dashboard" element={<RestaurantDashboardPage />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute allowedRoles={['RESTAURANT', 'ADMIN']}>
+                      <RestaurantDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/delivery"
+                  element={
+                    <ProtectedRoute allowedRoles={['DELIVERY_PARTNER', 'ADMIN']}>
+                      <DeliveryPartnerPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </div>
 

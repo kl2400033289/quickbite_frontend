@@ -12,9 +12,11 @@ import {
   Volume2,
   VolumeX,
   Flame,
+  Bike,
+  Shield,
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, getDefaultRouteForRole, ROLE_META } from '../../context/AuthContext';
 import { useAudio } from '../../context/AudioContext';
 import { QuickBiteLogo } from './QuickBiteLogo';
 
@@ -22,7 +24,7 @@ export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { itemCount, setIsCartOpen } = useCart();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, role, isAuthenticated, logout } = useAuth();
   const { isSoundEnabled, isAmbientPlaying, toggleSound, toggleAmbient } = useAudio();
   const location = useLocation();
   const navigate = useNavigate();
@@ -102,21 +104,57 @@ export const Navbar: React.FC = () => {
             >
               How It Works
             </a>
-            <Link
-              to="/dashboard"
-              className={`text-sm font-semibold transition-colors hover:text-tangerine-500 flex items-center gap-1.5 ${
-                location.pathname.startsWith('/dashboard')
-                  ? 'text-tangerine-500'
-                  : isScrolled
-                  ? 'text-charcoal-700'
-                  : isHome
-                  ? 'text-warm-100'
-                  : 'text-charcoal-700'
-              }`}
-            >
-              <UtensilsCrossed className="w-3.5 h-3.5" />
-              <span>For Restaurants</span>
-            </Link>
+            {(!isAuthenticated || role === 'RESTAURANT' || role === 'ADMIN') && (
+              <Link
+                to="/dashboard"
+                className={`text-sm font-semibold transition-colors hover:text-tangerine-500 flex items-center gap-1.5 ${
+                  location.pathname.startsWith('/dashboard')
+                    ? 'text-tangerine-500'
+                    : isScrolled
+                    ? 'text-charcoal-700'
+                    : isHome
+                    ? 'text-warm-100'
+                    : 'text-charcoal-700'
+                }`}
+              >
+                <UtensilsCrossed className="w-3.5 h-3.5" />
+                <span>For Restaurants</span>
+              </Link>
+            )}
+            {(role === 'DELIVERY_PARTNER' || role === 'ADMIN') && (
+              <Link
+                to="/delivery"
+                className={`text-sm font-semibold transition-colors hover:text-tangerine-500 flex items-center gap-1.5 ${
+                  location.pathname.startsWith('/delivery')
+                    ? 'text-tangerine-500'
+                    : isScrolled
+                    ? 'text-charcoal-700'
+                    : isHome
+                    ? 'text-warm-100'
+                    : 'text-charcoal-700'
+                }`}
+              >
+                <Bike className="w-3.5 h-3.5" />
+                <span>Delivery</span>
+              </Link>
+            )}
+            {role === 'ADMIN' && (
+              <Link
+                to="/admin"
+                className={`text-sm font-semibold transition-colors hover:text-tangerine-500 flex items-center gap-1.5 ${
+                  location.pathname.startsWith('/admin')
+                    ? 'text-tangerine-500'
+                    : isScrolled
+                    ? 'text-charcoal-700'
+                    : isHome
+                    ? 'text-warm-100'
+                    : 'text-charcoal-700'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Admin</span>
+              </Link>
+            )}
           </nav>
 
           {/* 6-9. Actions: Sound, Search, Cart, Log In, Sign Up */}
@@ -194,7 +232,7 @@ export const Navbar: React.FC = () => {
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <Link
-                  to="/orders"
+                  to={role === 'CUSTOMER' || !role ? '/orders' : getDefaultRouteForRole(role)}
                   className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
                     isScrolled
                       ? 'bg-warm-100 text-charcoal-800 hover:bg-warm-200'
@@ -205,6 +243,11 @@ export const Navbar: React.FC = () => {
                 >
                   <User className="w-3.5 h-3.5" />
                   <span className="max-w-[100px] truncate">{user?.email?.split('@')[0]}</span>
+                  {role && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-tangerine-500 text-white text-[10px] font-bold uppercase">
+                      {ROLE_META[role].shortLabel}
+                    </span>
+                  )}
                 </Link>
                 <button
                   onClick={logout}
@@ -283,17 +326,45 @@ export const Navbar: React.FC = () => {
               <span>How It Works</span>
               <ChevronRight className="w-4 h-4 text-charcoal-400" />
             </a>
-            <Link
-              to="/dashboard"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2 text-sm font-semibold border-b border-warm-100 text-tangerine-600"
-            >
-              <div className="flex items-center gap-2">
-                <UtensilsCrossed className="w-4 h-4" />
-                <span>For Restaurants</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-tangerine-600" />
-            </Link>
+            {(!isAuthenticated || role === 'RESTAURANT' || role === 'ADMIN') && (
+              <Link
+                to="/dashboard"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-between py-2 text-sm font-semibold border-b border-warm-100 text-tangerine-600"
+              >
+                <div className="flex items-center gap-2">
+                  <UtensilsCrossed className="w-4 h-4" />
+                  <span>For Restaurants</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-tangerine-600" />
+              </Link>
+            )}
+            {(role === 'DELIVERY_PARTNER' || role === 'ADMIN') && (
+              <Link
+                to="/delivery"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-between py-2 text-sm font-semibold border-b border-warm-100 text-tangerine-600"
+              >
+                <div className="flex items-center gap-2">
+                  <Bike className="w-4 h-4" />
+                  <span>Delivery Portal</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-tangerine-600" />
+              </Link>
+            )}
+            {role === 'ADMIN' && (
+              <Link
+                to="/admin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-between py-2 text-sm font-semibold border-b border-warm-100 text-tangerine-600"
+              >
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  <span>Admin Panel</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-tangerine-600" />
+              </Link>
+            )}
             <Link
               to="/orders"
               onClick={() => setIsMobileMenuOpen(false)}

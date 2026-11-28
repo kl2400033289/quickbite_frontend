@@ -1,23 +1,43 @@
 // Backend Microservices Contracts matching Spring Boot DTOs
 
+export type UserRole = 'CUSTOMER' | 'RESTAURANT' | 'DELIVERY_PARTNER' | 'ADMIN';
+
 export interface RegisterRequest {
   email: string;
   password: string;
+  role?: UserRole;
+  captchaId: string;
+  captchaAnswer: string;
 }
 
 export interface LoginRequest {
   email: string;
   password: string;
+  role?: UserRole;
+  captchaId: string;
+  captchaAnswer: string;
+}
+
+export interface CaptchaResponse {
+  captchaId: string;
+  imageDataUrl: string;
+  expiresInSeconds: number;
 }
 
 export interface AuthResponse {
   token: string;
   tokenType: string;
+  userId?: number;
+  email?: string;
+  role?: UserRole;
 }
 
 export interface UserResponse {
   userId: number;
   email: string;
+  role: UserRole;
+  token?: string;
+  tokenType?: string;
 }
 
 export interface RestaurantRequest {

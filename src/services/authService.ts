@@ -1,13 +1,22 @@
 import { apiClient, getAuthToken, setAuthToken, USE_MOCK_FALLBACK } from './api';
-import { AuthResponse, LoginRequest, RegisterRequest, UserResponse } from '../types/api';
+import { AuthResponse, CaptchaResponse, LoginRequest, RegisterRequest, UserResponse } from '../types/api';
 
 export const authService = {
+  async getCaptcha(): Promise<CaptchaResponse> {
+    return await apiClient<CaptchaResponse>('/api/auth/captcha', {
+      method: 'GET',
+    });
+  },
+
   async register(data: RegisterRequest): Promise<UserResponse> {
     try {
       const res = await apiClient<UserResponse>('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
       });
+      if (res.token) {
+        setAuthToken(res.token);
+      }
       return res;
     } catch (error) {
       if (USE_MOCK_FALLBACK) {
@@ -15,6 +24,7 @@ export const authService = {
         const mockUser: UserResponse = {
           userId: Date.now(),
           email: data.email,
+          role: data.role || 'CUSTOMER',
         };
         return mockUser;
       }
@@ -40,6 +50,8 @@ export const authService = {
         return {
           token: mockToken,
           tokenType: 'Bearer',
+          email: data.email,
+          role: data.role || 'CUSTOMER',
         };
       }
       throw error;
@@ -61,10 +73,17 @@ export const authService = {
         return {
           userId: 1,
           email: 'gourmet.user@quickbite.io',
+          role: 'CUSTOMER',
         };
       }
       throw error;
     }
+  },
+
+  async listUsers(): Promise<UserResponse[]> {
+    return await apiClient<UserResponse[]>('/api/auth/users', {
+      method: 'GET',
+    });
   },
 
   logout(): void {

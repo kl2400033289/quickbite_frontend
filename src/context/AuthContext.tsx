@@ -1,17 +1,52 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { LoginRequest, RegisterRequest, UserResponse } from '../types/api';
+import { LoginRequest, RegisterRequest, UserResponse, UserRole } from '../types/api';
 import { authService } from '../services/authService';
 import { getAuthToken } from '../services/api';
 
+export const ROLE_META: Record<
+  UserRole,
+  { label: string; shortLabel: string; defaultRoute: string; description: string }
+> = {
+  CUSTOMER: {
+    label: 'Customer',
+    shortLabel: 'Customer',
+    defaultRoute: '/',
+    description: 'Browse restaurants, order food & track live delivery',
+  },
+  RESTAURANT: {
+    label: 'Restaurant Partner',
+    shortLabel: 'Restaurant',
+    defaultRoute: '/dashboard',
+    description: 'Manage kitchen menu, accept or reject incoming orders',
+  },
+  DELIVERY_PARTNER: {
+    label: 'Delivery Partner',
+    shortLabel: 'Delivery',
+    defaultRoute: '/delivery',
+    description: 'Pick up confirmed orders and update live delivery status',
+  },
+  ADMIN: {
+    label: 'Platform Admin',
+    shortLabel: 'Admin',
+    defaultRoute: '/admin',
+    description: 'Oversee users, restaurants, and all platform orders',
+  },
+};
+
+export function getDefaultRouteForRole(role?: UserRole | null): string {
+  return role ? ROLE_META[role]?.defaultRoute || '/' : '/';
+}
+
 interface AuthContextType {
   user: UserResponse | null;
+  role: UserRole | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isOperatorMode: boolean;
   selectedOperatorRestaurantId: number;
-  login: (req: LoginRequest) => Promise<void>;
-  register: (req: RegisterRequest) => Promise<void>;
+  login: (req: LoginRequest) => Promise<UserResponse>;
+  register: (req: RegisterRequest) => Promise<UserResponse>;
   logout: () => void;
   toggleOperatorMode: () => void;
   setSelectedOperatorRestaurantId: (id: number) => void;
@@ -21,8 +56,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserResponse | null>(() => {
-    const saved = localStorage.getItem('quickbite_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('quickbite_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
   const [token, setToken] = useState<string | null>(getAuthToken());
   const [isLoading, setIsLoading] = useState(false);
@@ -47,50 +86,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  useEffect(() => {
-    if (token && !user) {
-      authService
-        .getCurrentUser()
-        .then((fetchedUser) => {
-          setUser(fetchedUser);
-          localStorage.setItem('quickbite_user', JSON.stringify(fetchedUser));
-        })
-        .catch(() => {
-          // Token might be expired or mock
-        });
-    }
-  }, [token, user]);
-
-  const login = async (req: LoginRequest) => {
-    setIsLoading(true);
-    try {
-      const authRes = await authService.login(req);
-      setToken(authRes.token);
-      let currentUser: UserResponse;
-      try {
-        currentUser = await authService.getCurrentUser();
-      } catch {
-        currentUser = { userId: 1, email: req.email };
-      }
-      setUser(currentUser);
-      localStorage.setItem('quickbite_user', JSON.stringify(currentUser));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (req: RegisterRequest) => {
-    setIsLoading(true);
-    try {
-      const newUser = await authService.register(req);
-      // Auto login upon successful registration
-      await login({ email: req.email, password: req.password });
-      setUser(newUser);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const logout = () => {
     authService.logout();
     setToken(null);
@@ -98,10 +93,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('quickbite_user');
   };
 
+  useEffect(() => {
+    if (token && (!user || !user.role)) {
+      authService
+        .getCurrentUser()
+        .then((fetchedUser) => {
+          const normalized: UserResponse = {
+            ...fetchedUser,
+            role: fetchedUser.role || 'CUSTOMER',
+          };
+          setUser(normalized);
+          localStorage.setItem('quickbite_user', JSON.stringify(normalized));
+        })
+        .catch(() => {
+          logout();
+        });
+    }
+  }, [token, user]);
+
+  const login = async (req: LoginRequest): Promise<UserResponse> => {
+    setIsLoading(true);
+    try {
+      const authRes = await authService.login(req);
+      setToken(authRes.token);
+      let currentUser: UserResponse;
+      if (authRes.userId && authRes.email && authRes.role) {
+        currentUser = {
+          userId: authRes.userId,
+          email: authRes.email,
+          role: authRes.role,
+        };
+      } else {
+        currentUser = await authService.getCurrentUser();
+      }
+      setUser(currentUser);
+      localStorage.setItem('quickbite_user', JSON.stringify(currentUser));
+      return currentUser;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (req: RegisterRequest): Promise<UserResponse> => {
+    setIsLoading(true);
+    try {
+      const registered = await authService.register(req);
+      if (registered.token) {
+        setToken(registered.token);
+      }
+      const normalized: UserResponse = {
+        userId: registered.userId,
+        email: registered.email,
+        role: registered.role || req.role || 'CUSTOMER',
+      };
+      setUser(normalized);
+      localStorage.setItem('quickbite_user', JSON.stringify(normalized));
+      return normalized;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
+        role: user?.role || null,
         token,
         isAuthenticated: !!token,
         isLoading,
